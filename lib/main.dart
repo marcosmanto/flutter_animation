@@ -38,10 +38,17 @@ class _LogoAppState extends State<LogoApp> with SingleTickerProviderStateMixin {
       duration: Duration(seconds: 2),
     );
 
-    animation = Tween<double>(begin: 0, end: 300).animate(controller);
-    animation.addListener(() {
-      setState(() {});
-    });
+    animation = Tween<double>(begin: 0, end: 300).animate(controller)
+      ..addStatusListener((status) {
+        if (status == AnimationStatus.completed) {
+          controller.reverse();
+        } else if (status == AnimationStatus.dismissed) {
+          controller.forward();
+        }
+      });
+    /*..addListener(() {
+        setState(() {});
+      });*/
 
     controller.forward();
   }
@@ -54,6 +61,17 @@ class _LogoAppState extends State<LogoApp> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    return AnimatedLogo(animation);
+  }
+}
+
+class AnimatedLogo extends AnimatedWidget {
+  AnimatedLogo(Animation<double> animation, {super.key})
+      : super(listenable: animation);
+
+  @override
+  Widget build(Object context) {
+    final animation = listenable as Animation<double>;
     return Center(
       child: SizedBox(
         height: animation.value,
