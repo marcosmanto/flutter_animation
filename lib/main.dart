@@ -29,6 +29,7 @@ class LogoApp extends StatefulWidget {
 class _LogoAppState extends State<LogoApp> with SingleTickerProviderStateMixin {
   late final AnimationController controller;
   late Animation<double> animation;
+  late Animation<double> animation2;
 
   @override
   void initState() {
@@ -46,9 +47,15 @@ class _LogoAppState extends State<LogoApp> with SingleTickerProviderStateMixin {
           controller.forward();
         }
       });
-    /*..addListener(() {
-        setState(() {});
-      });*/
+
+    animation2 = Tween<double>(begin: 0, end: 150).animate(controller)
+      ..addStatusListener((status) {
+        if (status == AnimationStatus.completed) {
+          controller.reverse();
+        } else if (status == AnimationStatus.dismissed) {
+          controller.forward();
+        }
+      });
 
     controller.forward();
   }
@@ -61,11 +68,54 @@ class _LogoAppState extends State<LogoApp> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedLogo(animation);
+    return Column(
+      children: [
+        GrowTransition(animation: animation, child: LogoWidget()),
+        GrowTransition(animation: animation2, child: LogoWidget())
+      ],
+    );
   }
 }
 
-class AnimatedLogo extends AnimatedWidget {
+class LogoWidget extends StatelessWidget {
+  const LogoWidget({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return FlutterLogo();
+  }
+}
+
+class GrowTransition extends StatelessWidget {
+  final Widget child;
+  final Animation<double> animation;
+
+  const GrowTransition({
+    required this.child,
+    required this.animation,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: AnimatedBuilder(
+        animation: animation,
+        builder: (context, child) {
+          return SizedBox(
+            height: animation.value,
+            width: animation.value,
+            child: child,
+          );
+        },
+        child: child,
+      ),
+    );
+  }
+}
+
+
+/*class AnimatedLogo extends AnimatedWidget {
   AnimatedLogo(Animation<double> animation, {super.key})
       : super(listenable: animation);
 
@@ -80,4 +130,4 @@ class AnimatedLogo extends AnimatedWidget {
       ),
     );
   }
-}
+}*/
